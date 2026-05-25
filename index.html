@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Дневник" />
+<meta name="theme-color" content="#1a1614" id="themeColorMeta" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
+<title>Дневник мыслей</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+/* ============ ТЕМЫ ============ */
+body[data-theme="coffee"] {
+  --bg: #1a1614; --bg-soft: #221c19; --bg-elev: #2a2320;
+  --ink: #f5ede4; --ink-soft: #c9bdb0; --ink-mute: #8a7e72;
+  --accent: #d4a574; --accent-soft: #b88a5a;
+  --border: rgba(245,237,228,0.08); --border-strong: rgba(245,237,228,0.16);
+  --danger: #c97064;
+  --bg-grad-1: rgba(212,165,116,0.06); --bg-grad-2: rgba(184,138,90,0.04);
+}
+body[data-theme="midnight"] {
+  --bg: #0e1420; --bg-soft: #161e2e; --bg-elev: #1e2740;
+  --ink: #e8edf5; --ink-soft: #b8c1d4; --ink-mute: #7a839a;
+  --accent: #a8b5d4; --accent-soft: #8593b3;
+  --border: rgba(232,237,245,0.08); --border-strong: rgba(232,237,245,0.16);
+  --danger: #d47a7a;
+  --bg-grad-1: rgba(168,181,212,0.07); --bg-grad-2: rgba(133,147,179,0.05);
+}
+body[data-theme="forest"] {
+  --bg: #121a16; --bg-soft: #1a241f; --bg-elev: #233029;
+  --ink: #ecf1ec; --ink-soft: #bdc8be; --ink-mute: #788578;
+  --accent: #c89968; --accent-soft: #a87f50;
+  --border: rgba(236,241,236,0.08); --border-strong: rgba(236,241,236,0.16);
+  --danger: #cd7a70;
+  --bg-grad-1: rgba(200,153,104,0.06); --bg-grad-2: rgba(120,180,140,0.04);
+}
+body[data-theme="parchment"] {
+  --bg: #f4ecdc; --bg-soft: #ebe1cc; --bg-elev: #e0d5be;
+  --ink: #2a2418; --ink-soft: #5a4e3a; --ink-mute: #8a7e62;
+  --accent: #8b5e3c; --accent-soft: #6b4830;
+  --border: rgba(42,36,24,0.1); --border-strong: rgba(42,36,24,0.2);
+  --danger: #a8443a;
+  --bg-grad-1: rgba(139,94,60,0.06); --bg-grad-2: rgba(107,72,48,0.04);
+}
+body[data-theme="sakura"] {
+  --bg: #1a1418; --bg-soft: #221a20; --bg-elev: #2a2028;
+  --ink: #f5e8ee; --ink-soft: #c9b5be; --ink-mute: #8a7280;
+  --accent: #e8a3b8; --accent-soft: #c98497;
+  --border: rgba(245,232,238,0.08); --border-strong: rgba(245,232,238,0.16);
+  --danger: #d47878;
+  --bg-grad-1: rgba(232,163,184,0.07); --bg-grad-2: rgba(201,132,151,0.05);
+}
+body[data-theme="graphite"] {
+  --bg: #141414; --bg-soft: #1c1c1c; --bg-elev: #262626;
+  --ink: #ededed; --ink-soft: #b8b8b8; --ink-mute: #767676;
+  --accent: #ededed; --accent-soft: #bababa;
+  --border: rgba(237,237,237,0.08); --border-strong: rgba(237,237,237,0.18);
+  --danger: #d47878;
+  --bg-grad-1: rgba(237,237,237,0.04); --bg-grad-2: rgba(180,180,180,0.03);
+}
+
+:root {
+  --shadow: 0 20px 50px rgba(0,0,0,0.4);
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Manrope', -apple-system, sans-serif;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.4s, color 0.4s;
+}
+
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(80px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  background-image:
+    radial-gradient(ellipse at top left, var(--bg-grad-1), transparent 50%),
+    radial-gradient(ellipse at bottom right, var(--bg-grad-2), transparent 50%);
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea, select { font-family: inherit; color: inherit; background: none; border: none; outline: none; resize: none; width: 100%; }
+
+/* ============ ШАПКА ============ */
+header {
+  padding: 24px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.brand {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+}
+.brand h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  font-style: italic;
+}
+.brand h1 span { color: var(--accent); }
+.menu-btn {
+  width: 38px; height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: background 0.2s;
+}
+.menu-btn:active { background: var(--bg-elev); }
+
+.tabs {
+  display: flex; gap: 6px;
+  overflow-x: auto; scrollbar-width: none;
+  margin-top: 16px; padding-bottom: 4px;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.tab.active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+main {
+  padding: 20px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.section-title {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+.section-title h2 {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+.section-title .count {
+  color: var(--ink-mute);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ============ ПОЛЕ ВВОДА ============ */
+.composer {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.composer:focus-within { border-color: var(--accent-soft); }
+.composer textarea {
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 24px;
+  max-height: 200px;
+}
+.composer textarea::placeholder {
+  color: var(--ink-mute);
+  font-style: italic;
+  font-family: var(--serif);
+  font-size: 18px;
+}
+
+/* ===== выбор периода в планнере ===== */
+.planner-controls {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.composer.planner-mode .planner-controls { display: block; }
+.period-chips {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 10px;
+}
+.chip {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  color: var(--ink-soft);
+}
+.chip.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.date-input-wrap {
+  display: flex; gap: 8px; align-items: center;
+}
+.date-input-wrap input,
+.date-input-wrap select {
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  flex: 1;
+}
+.date-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+}
+
+.composer-actions {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin-top: 12px;
+}
+.btn {
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+.btn-primary:active { background: var(--accent-soft); }
+.btn-primary:disabled { opacity: 0.4; }
+.btn-ghost { color: var(--ink-mute); }
+
+/* ============ ФИЛЬТРЫ ПЛАННЕРА ============ */
+.view-tabs {
+  display: flex; gap: 4px;
+  margin-bottom: 16px;
+  background: var(--bg-soft);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.view-tab {
+  flex: 1;
+  padding: 8px;
+  font-size: 13px;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  transition: all 0.2s;
+}
+.view-tab.active {
+  background: var(--bg-elev);
+  color: var(--ink);
+}
+
+/* ============ КАРТОЧКИ ЗАПИСЕЙ ============ */
+.entries { display: flex; flex-direction: column; gap: 12px; }
+.entry {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.entry-badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 3px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.entry-badge.soon { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.entry-badge.past { color: var(--ink-mute); border-color: var(--border); }
+.entry-text {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.entry-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.3px;
+}
+.entry-actions { display: flex; gap: 14px; }
+.entry-actions button {
+  font-size: 12px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.entry-actions button:active { color: var(--accent); }
+.entry.done .entry-text {
+  text-decoration: line-through;
+  color: var(--ink-mute);
+}
+
+.day-group { margin-bottom: 28px; }
+.day-label {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--accent);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.day-label .sub {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-mute);
+}
+.empty .icon {
+  font-family: var(--serif);
+  font-size: 48px;
+  font-style: italic;
+  color: var(--accent);
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+.empty p {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-style: italic;
+}
+
+/* ============ МОДАЛКИ ============ */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: none;
+  animation: fadeIn 0.2s;
+}
+.modal-backdrop.show { display: block; }
+.modal {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-elev);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  z-index: 101;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+.modal.show { transform: translateY(0); }
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.modal h3 {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+.menu-list { display: flex; flex-direction: column; gap: 2px; }
+.menu-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  text-align: left;
+  transition: background 0.2s;
+}
+.menu-item:active { background: var(--bg-soft); }
+.menu-item .ic { font-size: 20px; width: 24px; text-align: center; }
+.menu-item .lbl { flex: 1; }
+.menu-item .sub { font-size: 12px; color: var(--ink-mute); }
+.menu-item.danger { color: var(--danger); }
+
+/* Темы */
+.themes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.theme-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  text-align: left;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.theme-card:active { transform: scale(0.97); }
+.theme-card.active { border-color: var(--accent); }
+.theme-card .name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.theme-card .swatches {
+  display: flex; gap: 4px;
+}
+.theme-card .sw {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.theme-card .check {
+  position: absolute;
+  top: 8px; right: 8px;
+  font-size: 14px;
+  opacity: 0;
+}
+.theme-card.active .check { opacity: 1; }
+
+/* Управление разделами */
+.sections-edit { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.section-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.section-row input {
+  flex: 1;
+  font-size: 15px;
+}
+.section-row select {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 13px;
+  flex: 0 0 auto;
+  width: auto;
+}
+.section-row .rm-btn {
+  color: var(--danger);
+  font-size: 18px;
+  padding: 4px 8px;
+  width: auto;
+}
+.add-section-btn {
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  color: var(--accent);
+  font-size: 14px;
+  width: 100%;
+}
+
+.toast {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 200;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body data-theme="coffee">
+
+<header>
+  <div class="brand">
+    <h1>Дневник <span>мыслей</span></h1>
+    <button class="menu-btn" id="menuBtn" aria-label="Меню">≡</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+
+<main>
+  <div class="section-title">
+    <h2 id="sectionTitle">—</h2>
+    <span class="count" id="sectionCount">0</span>
+  </div>
+
+  <div class="composer" id="composer">
+    <textarea id="composerInput" placeholder="Что у тебя на уме..." rows="1"></textarea>
+
+    <div class="planner-controls" id="plannerControls">
+      <div class="period-chips" id="periodChips">
+        <button class="chip active" data-period="day">День</button>
+        <button class="chip" data-period="week">Неделя</button>
+        <button class="chip" data-period="month">Месяц</button>
+        <button class="chip" data-period="year">Год</button>
+        <button class="chip" data-period="someday">Когда-нибудь</button>
+      </div>
+      <div class="date-input-wrap" id="dateInputWrap"></div>
+    </div>
+
+    <div class="composer-actions">
+      <button class="btn btn-ghost" id="clearBtn">Очистить</button>
+      <button class="btn btn-primary" id="addBtn" disabled>Записать</button>
+    </div>
+  </div>
+
+  <div class="view-tabs" id="viewTabs" style="display:none;">
+    <button class="view-tab active" data-view="timeline">По времени</button>
+    <button class="view-tab" data-view="month">Месяц</button>
+    <button class="view-tab" data-view="year">Год</button>
+    <button class="view-tab" data-view="someday">Когда-нибудь</button>
+  </div>
+
+  <div id="entries" class="entries"></div>
+</main>
+
+<!-- Меню -->
+<div class="modal-backdrop" id="backdrop"></div>
+<div class="modal" id="menuModal">
+  <div class="modal-handle"></div>
+  <h3>Меню</h3>
+  <div class="menu-list">
+    <button class="menu-item" id="themesBtn">
+      <span class="ic">◐</span>
+      <span class="lbl">Тема оформления<div class="sub">Цвета и стиль</div></span>
+    </button>
+    <button class="menu-item" id="editSectionsBtn">
+      <span class="ic">✎</span>
+      <span class="lbl">Управлять разделами<div class="sub">Добавить, переименовать, удалить</div></span>
+    </button>
+    <button class="menu-item" id="exportBtn">
+      <span class="ic">↓</span>
+      <span class="lbl">Скачать память<div class="sub">Сохранить всё в файл</div></span>
+    </button>
+    <button class="menu-item" id="importBtn">
+      <span class="ic">↑</span>
+      <span class="lbl">Загрузить память<div class="sub">Восстановить из файла</div></span>
+    </button>
+    <button class="menu-item danger" id="clearAllBtn">
+      <span class="ic">⌫</span>
+      <span class="lbl">Очистить раздел<div class="sub">Удалить все записи текущего раздела</div></span>
+    </button>
+  </div>
+  <input type="file" id="fileInput" accept=".json" style="display:none" />
+</div>
+
+<!-- Темы -->
+<div class="modal" id="themesModal">
+  <div class="modal-handle"></div>
+  <h3>Выбери тему</h3>
+  <div class="themes-grid" id="themesGrid"></div>
+  <button class="btn btn-ghost" id="closeThemesBtn" style="width:100%; border:1px solid var(--border); padding:12px; margin-top:8px;">Закрыть</button>
+</div>
+
+<!-- Управление разделами -->
+<div class="modal" id="sectionsModal">
+  <div class="modal-handle"></div>
+  <h3>Разделы</h3>
+  <div class="sections-edit" id="sectionsEdit"></div>
+  <button class="add-section-btn" id="addSectionBtn">+ Добавить раздел</button>
+  <div style="display:flex; gap:8px; margin-top:18px;">
+    <button class="btn btn-ghost" id="cancelSectionsBtn" style="flex:1; border:1px solid var(--border);">Отмена</button>
+    <button class="btn btn-primary" id="saveSectionsBtn" style="flex:2;">Сохранить</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ
+   ============================================================ */
+const STORAGE_KEY = 'diary_data_v1'; // тот же ключ — старые данные подхватятся
+
+const DEFAULT_DATA = {
+  theme: 'coffee',
+  sections: [
+    { id: 's_thoughts', name: 'Мысли', type: 'note' },
+    { id: 's_tasks', name: 'Задачи', type: 'task' },
+    { id: 's_goals', name: 'Цели', type: 'note' },
+    { id: 's_plans', name: 'Планы', type: 'planner' },
+    { id: 's_daily', name: 'Дневник', type: 'daily' }
+  ],
+  entries: {},
+  currentSectionId: 's_thoughts'
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(DEFAULT_DATA);
+    const parsed = JSON.parse(raw);
+    if (!parsed.sections || !parsed.entries) return structuredClone(DEFAULT_DATA);
+    if (!parsed.theme) parsed.theme = 'coffee';
+    return parsed;
+  } catch (e) {
+    return structuredClone(DEFAULT_DATA);
+  }
+}
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { showToast('Ошибка сохранения'); }
+}
+
+let state = loadData();
+
+if (!state.sections.find(s => s.id === state.currentSectionId)) {
+  state.currentSectionId = state.sections[0]?.id || null;
+}
+
+// миграция: если у пользователя был раздел Планы как note, превратим в planner мягко?
+// Нет — не трогаем, чтобы записи не сломались. Пользователь сам может изменить тип.
+
+// текущий режим для планнера
+let composerPeriod = 'day';
+let composerDate = todayISO();
+let plannerView = 'timeline';
+
+/* ============================================================
+   ТЕМЫ
+   ============================================================ */
+const THEMES = [
+  { id: 'coffee', name: 'Кофе', swatches: ['#1a1614', '#d4a574', '#f5ede4'] },
+  { id: 'midnight', name: 'Полночь', swatches: ['#0e1420', '#a8b5d4', '#e8edf5'] },
+  { id: 'forest', name: 'Лес', swatches: ['#121a16', '#c89968', '#ecf1ec'] },
+  { id: 'parchment', name: 'Пергамент', swatches: ['#f4ecdc', '#8b5e3c', '#2a2418'] },
+  { id: 'sakura', name: 'Сакура', swatches: ['#1a1418', '#e8a3b8', '#f5e8ee'] },
+  { id: 'graphite', name: 'Графит', swatches: ['#141414', '#ededed', '#b8b8b8'] }
+];
+
+function applyTheme(themeId) {
+  document.body.setAttribute('data-theme', themeId);
+  // обновим meta theme-color
+  const theme = THEMES.find(t => t.id === themeId);
+  if (theme) {
+    document.getElementById('themeColorMeta').setAttribute('content', theme.swatches[0]);
+  }
+}
+
+applyTheme(state.theme);
+
+/* ============================================================
+   УТИЛИТЫ ДАТ
+   ============================================================ */
+function uid() { return 'e_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+
+function thisMonthISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1);
+}
+
+function thisYearISO() {
+  return String(new Date().getFullYear());
+}
+
+function thisWeekISO() {
+  // ISO week
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+  const yearStart = new Date(d.getFullYear(), 0, 1);
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return d.getFullYear() + '-W' + pad(weekNo);
+}
+
+const RU_MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const RU_MONTHS_NOM = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  const today = new Date();
+  const sameDay = d.toDateString() === today.toDateString();
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+  const sameYesterday = d.toDateString() === yesterday.toDateString();
+  const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  if (sameDay) return 'Сегодня, ' + time;
+  if (sameYesterday) return 'Вчера, ' + time;
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + ', ' + time;
+}
+
+function formatDay(ts) {
+  const d = new Date(ts);
+  const today = new Date();
+  if (d.toDateString() === today.toDateString()) return 'Сегодня';
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
+}
+
+function dayKey(ts) {
+  const d = new Date(ts);
+  return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+}
+
+/* Период плана → читаемый текст */
+function periodLabel(period, value) {
+  if (period === 'someday') return 'Когда-нибудь';
+  if (period === 'year') return value;
+  if (period === 'month') {
+    const [y, m] = value.split('-');
+    return RU_MONTHS_NOM[parseInt(m,10) - 1] + ' ' + y;
+  }
+  if (period === 'week') {
+    const [y, w] = value.split('-W');
+    return y + ' • ' + w + '-я неделя';
+  }
+  if (period === 'day') {
+    const [y, m, d] = value.split('-');
+    const date = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
+    const today = new Date(); today.setHours(0,0,0,0);
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+    if (date.getTime() === today.getTime()) return 'Сегодня';
+    if (date.getTime() === tomorrow.getTime()) return 'Завтра';
+    return parseInt(d,10) + ' ' + RU_MONTHS[parseInt(m,10)-1] + ' ' + y;
+  }
+  return '';
+}
+
+/* Сортировка планов по «когда» */
+function planSortKey(e) {
+  // меньше = раньше; someday — в самый конец
+  if (!e.period || e.period === 'someday') return 'z_someday';
+  if (e.period === 'day') return '1_' + e.periodValue;
+  if (e.period === 'week') {
+    const [y, w] = e.periodValue.split('-W');
+    return '2_' + y + '-W' + pad(parseInt(w,10));
+  }
+  if (e.period === 'month') return '3_' + e.periodValue;
+  if (e.period === 'year') return '4_' + e.periodValue;
+  return 'z';
+}
+
+function isPast(period, value) {
+  if (period === 'someday') return false;
+  const now = new Date();
+  if (period === 'day') {
+    const [y, m, d] = value.split('-').map(Number);
+    const target = new Date(y, m-1, d);
+    target.setHours(23,59,59,999);
+    return target < now;
+  }
+  if (period === 'month') {
+    const [y, m] = value.split('-').map(Number);
+    const target = new Date(y, m, 0); // последний день месяца
+    target.setHours(23,59,59,999);
+    return target < now;
+  }
+  if (period === 'year') {
+    const y = parseInt(value, 10);
+    return y < now.getFullYear();
+  }
+  if (period === 'week') {
+    // приблизительно: если неделя из прошлого года или раньше текущей
+    const [y, w] = value.split('-W').map(Number);
+    if (y < now.getFullYear()) return true;
+    if (y > now.getFullYear()) return false;
+    // упрощенно сравним
+    return w < getISOWeekNumber(now) - 1;
+  }
+  return false;
+}
+
+function getISOWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function isSoon(period, value) {
+  if (period !== 'day') return false;
+  const [y, m, d] = value.split('-').map(Number);
+  const target = new Date(y, m-1, d);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diffDays = (target - today) / (1000*60*60*24);
+  return diffDays >= 0 && diffDays <= 7;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   РЕНДЕРИНГ
+   ============================================================ */
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  state.sections.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'tab' + (s.id === state.currentSectionId ? ' active' : '');
+    b.textContent = s.name;
+    b.onclick = () => {
+      state.currentSectionId = s.id;
+      saveData();
+      render();
+    };
+    tabs.appendChild(b);
+  });
+}
+
+function getCurrentSection() {
+  return state.sections.find(s => s.id === state.currentSectionId);
+}
+
+function renderComposer() {
+  const section = getCurrentSection();
+  const composer = document.getElementById('composer');
+  const ta = document.getElementById('composerInput');
+  if (!section) return;
+
+  const placeholders = {
+    task: 'Что нужно сделать...',
+    daily: 'Запись на сегодня...',
+    note: 'Что у тебя на уме...',
+    planner: 'Что планируешь...'
+  };
+  ta.placeholder = placeholders[section.type] || placeholders.note;
+
+  composer.classList.toggle('planner-mode', section.type === 'planner');
+
+  if (section.type === 'planner') {
+    renderDateInput();
+  }
+}
+
+function renderDateInput() {
+  const wrap = document.getElementById('dateInputWrap');
+  wrap.innerHTML = '';
+
+  if (composerPeriod === 'someday') {
+    wrap.innerHTML = '<div style="color:var(--ink-mute); font-size:14px; font-style:italic; padding:8px 0;">Без конкретной даты — просто отметка</div>';
+    return;
+  }
+
+  if (composerPeriod === 'day') {
+    const inp = document.createElement('input');
+    inp.type = 'date';
+    inp.value = composerDate || todayISO();
+    inp.onchange = (e) => composerDate = e.target.value;
+    composerDate = inp.value;
+    wrap.appendChild(inp);
+    return;
+  }
+
+  if (composerPeriod === 'week') {
+    const inp = document.createElement('input');
+    inp.type = 'week';
+    inp.value = composerDate && composerDate.includes('W') ? composerDate : thisWeekISO();
+    inp.onchange = (e) => composerDate = e.target.value;
+    composerDate = inp.value;
+    wrap.appendChild(inp);
+    return;
+  }
+
+  if (composerPeriod === 'month') {
+    const inp = document.createElement('input');
+    inp.type = 'month';
+    inp.value = (composerDate && composerDate.length === 7) ? composerDate : thisMonthISO();
+    inp.onchange = (e) => composerDate = e.target.value;
+    composerDate = inp.value;
+    wrap.appendChild(inp);
+    return;
+  }
+
+  if (composerPeriod === 'year') {
+    const sel = document.createElement('select');
+    sel.style.cssText = 'padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:14px;';
+    const thisYear = new Date().getFullYear();
+    for (let y = thisYear; y <= thisYear + 10; y++) {
+      const opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = y;
+      sel.appendChild(opt);
+    }
+    sel.value = (composerDate && /^\d{4}$/.test(composerDate)) ? composerDate : String(thisYear);
+    sel.onchange = (e) => composerDate = e.target.value;
+    composerDate = sel.value;
+    wrap.appendChild(sel);
+  }
+}
+
+function renderEntries() {
+  const section = getCurrentSection();
+  const list = document.getElementById('entries');
+  const titleEl = document.getElementById('sectionTitle');
+  const countEl = document.getElementById('sectionCount');
+  const viewTabsEl = document.getElementById('viewTabs');
+
+  if (!section) {
+    titleEl.textContent = 'Нет разделов';
+    list.innerHTML = '';
+    countEl.textContent = '0';
+    viewTabsEl.style.display = 'none';
+    return;
+  }
+
+  titleEl.textContent = section.name;
+  const entries = (state.entries[section.id] || []);
+  countEl.textContent = entries.length;
+
+  viewTabsEl.style.display = section.type === 'planner' ? 'flex' : 'none';
+  list.innerHTML = '';
+
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon">✦</div><p>Здесь пока тихо.<br>Напиши первую запись.</p></div>';
+    return;
+  }
+
+  if (section.type === 'planner') {
+    renderPlannerEntries(entries, section, list);
+    return;
+  }
+
+  // По дням
+  if (section.type === 'daily') {
+    const sorted = entries.slice().sort((a,b) => b.ts - a.ts);
+    let lastDay = null;
+    sorted.forEach(e => {
+      const key = dayKey(e.ts);
+      if (key !== lastDay) {
+        const grp = document.createElement('div');
+        grp.className = 'day-label';
+        const left = document.createElement('span');
+        left.textContent = formatDay(e.ts);
+        const right = document.createElement('span');
+        right.className = 'sub';
+        const d = new Date(e.ts);
+        right.textContent = d.toLocaleDateString('ru-RU', { weekday: 'short' });
+        grp.appendChild(left); grp.appendChild(right);
+        list.appendChild(grp);
+        lastDay = key;
+      }
+      list.appendChild(renderEntry(e, section));
+    });
+    return;
+  }
+
+  // Заметки и задачи — просто свежие сверху
+  const sorted = entries.slice().sort((a,b) => b.ts - a.ts);
+  sorted.forEach(e => list.appendChild(renderEntry(e, section)));
+}
+
+function renderPlannerEntries(entries, section, list) {
+  // готовим записи, по умолчанию done в самом низу
+  let items = entries.slice();
+
+  // фильтрация по виду
+  if (plannerView === 'someday') {
+    items = items.filter(e => !e.period || e.period === 'someday');
+  } else if (plannerView === 'month') {
+    items = items.filter(e => {
+      if (!e.period || e.period === 'someday') return false;
+      if (e.period === 'year') return false;
+      if (e.period === 'month') return e.periodValue === thisMonthISO();
+      if (e.period === 'day') return e.periodValue && e.periodValue.startsWith(thisMonthISO());
+      if (e.period === 'week') {
+        // относим неделю к месяцу её середины
+        const [y, w] = e.periodValue.split('-W').map(Number);
+        const date = isoWeekToDate(y, w);
+        return date.getFullYear() === new Date().getFullYear() && date.getMonth() === new Date().getMonth();
+      }
+      return false;
+    });
+  } else if (plannerView === 'year') {
+    const ty = thisYearISO();
+    items = items.filter(e => {
+      if (!e.period || e.period === 'someday') return false;
+      if (e.period === 'year') return e.periodValue === ty;
+      if (e.period === 'month') return e.periodValue.startsWith(ty);
+      if (e.period === 'day') return e.periodValue.startsWith(ty);
+      if (e.period === 'week') return e.periodValue.startsWith(ty);
+      return false;
+    });
+  }
+  // 'timeline' — всё
+
+  // сортировка: незавершенные раньше, по времени; завершенные в конце
+  items.sort((a,b) => {
+    if (!!a.done !== !!b.done) return a.done ? 1 : -1;
+    return planSortKey(a).localeCompare(planSortKey(b));
+  });
+
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon">✦</div><p>Здесь пусто.<br>Запиши свой первый план.</p></div>';
+    return;
+  }
+
+  // группировка для timeline вида
+  if (plannerView === 'timeline') {
+    let lastGroup = null;
+    items.forEach(e => {
+      const grpName = plannerGroupName(e);
+      if (grpName !== lastGroup) {
+        const grp = document.createElement('div');
+        grp.className = 'day-label';
+        const left = document.createElement('span');
+        left.textContent = grpName;
+        grp.appendChild(left);
+        list.appendChild(grp);
+        lastGroup = grpName;
+      }
+      list.appendChild(renderEntry(e, section));
+    });
+  } else {
+    items.forEach(e => list.appendChild(renderEntry(e, section)));
+  }
+}
+
+function plannerGroupName(e) {
+  if (!e.period || e.period === 'someday') return 'Когда-нибудь';
+  if (e.period === 'day') {
+    if (isSoon(e.period, e.periodValue) && !isPast(e.period, e.periodValue)) return 'Ближайшие 7 дней';
+    if (isPast(e.period, e.periodValue)) return 'Прошедшее';
+    // относим к месяцу
+    const [y, m] = e.periodValue.split('-');
+    return RU_MONTHS_NOM[parseInt(m,10)-1] + ' ' + y;
+  }
+  if (e.period === 'week') {
+    const [y, w] = e.periodValue.split('-W').map(Number);
+    const date = isoWeekToDate(y, w);
+    return RU_MONTHS_NOM[date.getMonth()] + ' ' + y;
+  }
+  if (e.period === 'month') {
+    const [y, m] = e.periodValue.split('-');
+    return RU_MONTHS_NOM[parseInt(m,10)-1] + ' ' + y;
+  }
+  if (e.period === 'year') return 'Год ' + e.periodValue;
+  return '';
+}
+
+function isoWeekToDate(year, week) {
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay() || 7;
+  if (dow <= 4) simple.setDate(simple.getDate() - dow + 1);
+  else simple.setDate(simple.getDate() + 8 - dow);
+  return simple;
+}
+
+function renderEntry(e, section) {
+  const div = document.createElement('div');
+  div.className = 'entry' + (e.done ? ' done' : '');
+
+  if (section.type === 'planner' && e.period) {
+    const badge = document.createElement('span');
+    let cls = 'entry-badge';
+    if (isPast(e.period, e.periodValue) && !e.done) cls += ' past';
+    if (isSoon(e.period, e.periodValue) && !e.done) cls += ' soon';
+    badge.className = cls;
+    badge.textContent = periodLabel(e.period, e.periodValue);
+    div.appendChild(badge);
+  }
+
+  const text = document.createElement('div');
+  text.className = 'entry-text';
+  text.textContent = e.text;
+  div.appendChild(text);
+
+  const meta = document.createElement('div');
+  meta.className = 'entry-meta';
+  const timeSpan = document.createElement('span');
+  timeSpan.textContent = formatTime(e.ts);
+  meta.appendChild(timeSpan);
+
+  const actions = document.createElement('div');
+  actions.className = 'entry-actions';
+
+  if (section.type === 'task' || section.type === 'planner') {
+    const tBtn = document.createElement('button');
+    tBtn.textContent = e.done ? 'Вернуть' : 'Готово';
+    tBtn.onclick = () => {
+      e.done = !e.done;
+      saveData(); render();
+    };
+    actions.appendChild(tBtn);
+  }
+
+  const editBtn = document.createElement('button');
+  editBtn.textContent = 'Изм';
+  editBtn.onclick = () => editEntry(e, section);
+  actions.appendChild(editBtn);
+
+  const delBtn = document.createElement('button');
+  delBtn.textContent = 'Удал';
+  delBtn.onclick = () => {
+    if (confirm('Удалить запись?')) {
+      state.entries[section.id] = state.entries[section.id].filter(x => x.id !== e.id);
+      saveData(); render();
+    }
+  };
+  actions.appendChild(delBtn);
+
+  meta.appendChild(actions);
+  div.appendChild(meta);
+  return div;
+}
+
+function editEntry(e, section) {
+  const newText = prompt('Изменить запись:', e.text);
+  if (newText !== null && newText.trim() !== '') {
+    e.text = newText.trim();
+    saveData(); render();
+  }
+}
+
+function render() {
+  renderTabs();
+  renderComposer();
+  renderEntries();
+}
+
+/* ============================================================
+   ВВОД
+   ============================================================ */
+const composerInput = document.getElementById('composerInput');
+const addBtn = document.getElementById('addBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+composerInput.addEventListener('input', () => {
+  composerInput.style.height = 'auto';
+  composerInput.style.height = Math.min(composerInput.scrollHeight, 200) + 'px';
+  addBtn.disabled = composerInput.value.trim() === '';
+});
+
+// чипы периодов
+document.getElementById('periodChips').addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  composerPeriod = btn.dataset.period;
+  document.querySelectorAll('#periodChips .chip').forEach(c => c.classList.toggle('active', c === btn));
+  // сброс composerDate под новый период
+  if (composerPeriod === 'day') composerDate = todayISO();
+  else if (composerPeriod === 'month') composerDate = thisMonthISO();
+  else if (composerPeriod === 'week') composerDate = thisWeekISO();
+  else if (composerPeriod === 'year') composerDate = thisYearISO();
+  else composerDate = '';
+  renderDateInput();
+});
+
+addBtn.onclick = () => {
+  const text = composerInput.value.trim();
+  if (!text) return;
+  const section = getCurrentSection();
+  if (!section) return;
+  if (!state.entries[section.id]) state.entries[section.id] = [];
+
+  const entry = {
+    id: uid(),
+    text,
+    ts: Date.now(),
+    done: false
+  };
+
+  if (section.type === 'planner') {
+    entry.period = composerPeriod;
+    entry.periodValue = composerPeriod === 'someday' ? null : composerDate;
+  }
+
+  state.entries[section.id].push(entry);
+  composerInput.value = '';
+  composerInput.style.height = 'auto';
+  addBtn.disabled = true;
+  saveData();
+  render();
+};
+
+clearBtn.onclick = () => {
+  composerInput.value = '';
+  composerInput.style.height = 'auto';
+  addBtn.disabled = true;
+};
+
+// переключение вида планнера
+document.getElementById('viewTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.view-tab');
+  if (!btn) return;
+  plannerView = btn.dataset.view;
+  document.querySelectorAll('#viewTabs .view-tab').forEach(t => t.classList.toggle('active', t === btn));
+  renderEntries();
+});
+
+/* ============================================================
+   МЕНЮ / МОДАЛКИ
+   ============================================================ */
+const backdrop = document.getElementById('backdrop');
+const menuModal = document.getElementById('menuModal');
+const sectionsModal = document.getElementById('sectionsModal');
+const themesModal = document.getElementById('themesModal');
+
+function openModal(modal) {
+  backdrop.classList.add('show');
+  modal.classList.add('show');
+}
+function closeAllModals() {
+  backdrop.classList.remove('show');
+  menuModal.classList.remove('show');
+  sectionsModal.classList.remove('show');
+  themesModal.classList.remove('show');
+}
+backdrop.onclick = closeAllModals;
+
+document.getElementById('menuBtn').onclick = () => openModal(menuModal);
+
+/* ====== ТЕМЫ ====== */
+function renderThemes() {
+  const grid = document.getElementById('themesGrid');
+  grid.innerHTML = '';
+  THEMES.forEach(t => {
+    const card = document.createElement('button');
+    card.className = 'theme-card' + (state.theme === t.id ? ' active' : '');
+    card.style.background = t.swatches[0];
+    card.style.color = t.swatches[2];
+
+    const nm = document.createElement('div');
+    nm.className = 'name';
+    nm.textContent = t.name;
+    nm.style.color = t.swatches[2];
+    card.appendChild(nm);
+
+    const sw = document.createElement('div');
+    sw.className = 'swatches';
+    t.swatches.forEach(c => {
+      const dot = document.createElement('div');
+      dot.className = 'sw';
+      dot.style.background = c;
+      sw.appendChild(dot);
+    });
+    card.appendChild(sw);
+
+    const check = document.createElement('div');
+    check.className = 'check';
+    check.textContent = '✓';
+    check.style.color = t.swatches[1];
+    card.appendChild(check);
+
+    card.onclick = () => {
+      state.theme = t.id;
+      applyTheme(t.id);
+      saveData();
+      renderThemes();
+    };
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('themesBtn').onclick = () => {
+  menuModal.classList.remove('show');
+  renderThemes();
+  themesModal.classList.add('show');
+};
+document.getElementById('closeThemesBtn').onclick = closeAllModals;
+
+/* ====== ЭКСПОРТ/ИМПОРТ ====== */
+document.getElementById('exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'diary-' + stamp + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  closeAllModals();
+  showToast('Память скачана');
+};
+
+const fileInput = document.getElementById('fileInput');
+document.getElementById('importBtn').onclick = () => fileInput.click();
+fileInput.onchange = (ev) => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.sections || !data.entries) throw new Error('Не тот файл');
+      if (confirm('Заменить текущие данные данными из файла?')) {
+        state = data;
+        if (!state.theme) state.theme = 'coffee';
+        applyTheme(state.theme);
+        if (!state.sections.find(s => s.id === state.currentSectionId)) {
+          state.currentSectionId = state.sections[0]?.id || null;
+        }
+        saveData();
+        render();
+        closeAllModals();
+        showToast('Память загружена');
+      }
+    } catch (err) {
+      alert('Не удалось прочитать файл: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  fileInput.value = '';
+};
+
+document.getElementById('clearAllBtn').onclick = () => {
+  const s = getCurrentSection();
+  if (!s) return;
+  if (confirm('Удалить все записи раздела «' + s.name + '»? Это нельзя отменить.')) {
+    state.entries[s.id] = [];
+    saveData();
+    render();
+    closeAllModals();
+    showToast('Раздел очищен');
+  }
+};
+
+/* ====== РАЗДЕЛЫ ====== */
+let draftSections = [];
+
+document.getElementById('editSectionsBtn').onclick = () => {
+  draftSections = state.sections.map(s => ({ ...s }));
+  renderSectionsEdit();
+  menuModal.classList.remove('show');
+  sectionsModal.classList.add('show');
+};
+
+function renderSectionsEdit() {
+  const wrap = document.getElementById('sectionsEdit');
+  wrap.innerHTML = '';
+  draftSections.forEach((s, idx) => {
+    const row = document.createElement('div');
+    row.className = 'section-row';
+
+    const inp = document.createElement('input');
+    inp.value = s.name;
+    inp.placeholder = 'Название раздела';
+    inp.oninput = (e) => { draftSections[idx].name = e.target.value; };
+    row.appendChild(inp);
+
+    const typeSel = document.createElement('select');
+    [['note','Заметки'], ['task','Задачи'], ['daily','По дням'], ['planner','План']].forEach(([v, l]) => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = l;
+      if (s.type === v) opt.selected = true;
+      typeSel.appendChild(opt);
+    });
+    typeSel.onchange = (e) => { draftSections[idx].type = e.target.value; };
+    row.appendChild(typeSel);
+
+    const rm = document.createElement('button');
+    rm.className = 'rm-btn';
+    rm.textContent = '×';
+    rm.onclick = () => {
+      if (draftSections.length === 1) {
+        alert('Должен остаться хотя бы один раздел');
+        return;
+      }
+      if (confirm('Удалить раздел «' + s.name + '»? Все записи внутри тоже пропадут.')) {
+        draftSections.splice(idx, 1);
+        renderSectionsEdit();
+      }
+    };
+    row.appendChild(rm);
+
+    wrap.appendChild(row);
+  });
+}
+
+document.getElementById('addSectionBtn').onclick = () => {
+  draftSections.push({ id: 's_' + uid(), name: 'Новый раздел', type: 'note' });
+  renderSectionsEdit();
+};
+
+document.getElementById('cancelSectionsBtn').onclick = closeAllModals;
+
+document.getElementById('saveSectionsBtn').onclick = () => {
+  for (const s of draftSections) {
+    if (!s.name.trim()) { alert('У всех разделов должно быть название'); return; }
+  }
+  const newIds = new Set(draftSections.map(s => s.id));
+  Object.keys(state.entries).forEach(id => {
+    if (!newIds.has(id)) delete state.entries[id];
+  });
+  state.sections = draftSections.map(s => ({ ...s, name: s.name.trim() }));
+  if (!newIds.has(state.currentSectionId)) {
+    state.currentSectionId = state.sections[0]?.id || null;
+  }
+  saveData();
+  render();
+  closeAllModals();
+  showToast('Разделы сохранены');
+};
+
+/* ============================================================
+   SERVICE WORKER
+   ============================================================ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+/* СТАРТ */
+render();
+</script>
+</body>
+</html>
